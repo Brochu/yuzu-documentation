@@ -1,0 +1,90 @@
+#9813 - Metroid Prime Remastered
+## Shadow rendering issue
+
+* Only happens with the vulkan renderer
+    * Most likely means the shader logic is okay?
+    * Unless there is an issue compiling to spir-v
+    * This is not true, same issue can be observed on OpenGL renderer
+        * with more issues on top (dark textures)
+
+* Since we are looking at an issue with shadow mapping, need to find depth only pass from light perspective
+
+* Found a pass that uses a render target 256x256 with a format of D16_float
+    * Has the correct orientation from a light's perspective
+    * Renders Samus' mesh correctly to the texture
+    * Correctly creates a memory barrier to use the texture in a later pass to render shadows
+
+* I want to find out how to stop the execution when the shadow rendering is happening
+    * Find the ID of VkRenderPass and/or VkGraphicsPipeline
+    * Stop execution when we encouter a vkCmdBeginRenderPass with the right pass?
+
+* Maybe try to decompile shaders to debug why nothing is rendered even with a valid light depth texture
+    * ChatGPT? maybe
+    * ChatGPT can be used for this, but there are some inaccuracies
+
+* Also try and find the IDs of the shadow draw pass
+    * After looking into it, this would not be very useful
+    * Better to try and find what data could be invalid
+    * The shader/ROM logic cannot be changed
+
+* Find the draws that uses the D16 shadow maps
+    * Since the depth only pass seems to render properly
+    * Was able to find the draw that is supposed to render shadows
+    * The draw is combined with some screen effects for when damage is taken
+    * Draw 3 vertices, the triangle is supposed to be placed under the mesh casting shadows
+    * I saw some examples where the triangle is either misaligned or out of the viewport?
+        * Vertex buffer not getting valid data to generate the vertices for the frag shader?
+
+-----------------------------------
+First update post on GHIssues:
+
+Hello,
+
+I was able to iron out the issues I had capturing the game on RenderDoc and I was able to look into this issue a little bit more. My first goal was to find the passes that would produce and use the shadow maps. I captured the moment after Samus gets out of her ship to check out the frame's steps.
+
+I found a depth-only pass that renders into an image (D16, 256x256) that looks like this:
+    * img *
+
+So I know that the shadow map rendering seems to be working as expected. My next step was to find the pass that uses this texture as a resource in order to render the shadow under Samus. This is the draw call I found that uses the shadow map as a frag shader input.
+
+From what I understand, this draw is supposed to render the shadow to a triangle placed below the mesh casting the shadow. The vertex input can be seen here for this draw:
+    * img *
+
+I think the problem could be related to the position that the vert shader outputs. It seems like the vertices are all placed outside of the viewport.
+    * img *
+
+I took a different capture later on where a shadow was correctly rendered for an enemy and in that case, the triangle where the shadow is rendered is properly placed within the viewport bounds.
+    * img *
+
+I am not sure how these vertices are provided by the game, or how they are handled by the emulator yet. I just wanted to give a quick run down of what I found on my end. If anyone is more familiar with the emulator can think of something I can look into or some idea of why this is happening, please let me know and I will be happy to look in more details. I will keep looking for more information and maybe which part of the emulator could be causing this.
+
+I am a bit new with the process of working on OSS on Github, so please let me know if there is some information missing that could be helpful for collaboration on this issue.
+
+-----------------------------------
+
+* Trying to find where the vertices data comes from for shadow meshes
+    * One tri, that is supposed to be placed under the mesh that casts a shadow
+    * The vertices change shape based off of how close the mesh is and its orientation
+    * The input vertices seem okay?
+    * Sometimes the output vertices are off screen or too thin to render the shadow
+
+* Another issue could be that the depth test is enabled for this shadow draw
+    * It won't draw to the depth buffer, but it will test before rendering
+    * Maybe we need to ignore depth but the emulator skips this set state call?
+    * Try to force disable the depth test for shadow rendering
+        * This won't fix the cases where the tri is out of viewport completely
+
+* Found a repository available on Github of the GC version of the game being decompiled.
+    * Looked into the logic related to shadow rendering
+        * Maybe some of the logic was carried over in the Switch port
+    * Was able to find 3 typed of shadow rendering
+        * CSimpleShadow, seems used for general actors
+        * CWorldShadow, seems to be used to render PlayerGun's shadow
+        * CProjectedShadow, seems to be used for rendering shadow map in scripted scenes? Not 100% sure
+    * From a quick look, the way shadow rendering happens in these files match the overall logic found in captures
+    * Simple and World shadows seems to use vertex data streaming? Explains the StreamBuffer bound in capture
+        * Need to look into vertex Streaming and how it works and how it's handled in Yuzu
+        * What is used to transfer vertex data from vertex shader to fragment shader?
+    * World shadow rendering seems to set the depth test for rendering off
+        * Maybe confirms my earlier idea?
+        * Try a quick test to disable depth test for shadow render see if it improves results
