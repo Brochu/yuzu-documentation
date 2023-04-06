@@ -73,6 +73,9 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * Maybe we need to ignore depth but the emulator skips this set state call?
     * Try to force disable the depth test for shadow rendering
         * This won't fix the cases where the tri is out of viewport completely
+        * This does not work, game unplayable
+    * Try to modify the key for the graphics pipeline used to render shadow planes to skip depth test
+        * Need to check pipelines as they are created initially, find any pass that outputs D16 depth format
 
 * Found a repository available on Github of the GC version of the game being decompiled.
     * Looked into the logic related to shadow rendering
@@ -83,8 +86,12 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
         * CProjectedShadow, seems to be used for rendering shadow map in scripted scenes? Not 100% sure
     * From a quick look, the way shadow rendering happens in these files match the overall logic found in captures
     * Simple and World shadows seems to use vertex data streaming? Explains the StreamBuffer bound in capture
-        * Need to look into vertex Streaming and how it works and how it's handled in Yuzu
-        * What is used to transfer vertex data from vertex shader to fragment shader?
     * World shadow rendering seems to set the depth test for rendering off
         * Maybe confirms my earlier idea?
         * Try a quick test to disable depth test for shadow render see if it improves results
+
+* Seems like a lot of draws/passes use vertex streaming, need to look into this tech
+    * Need to look into vertex Streaming and how it works and how it's handled in Yuzu
+    * What is used to transfer vertex data from vertex shader to fragment shader?
+    * Based off of some OpenGL extension for vertex feedback
+    * Is that not handled well in Yuzu and that's why some shadow plane vertices are out of viewport
