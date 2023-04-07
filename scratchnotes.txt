@@ -95,3 +95,20 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * What is used to transfer vertex data from vertex shader to fragment shader?
     * Based off of some OpenGL extension for vertex feedback
     * Is that not handled well in Yuzu and that's why some shadow plane vertices are out of viewport
+
+* Can I find how are shadows calculated for sure from the ROM data
+    * Find where the code is located in the ROM
+    * Try decompiling the source code?
+    * I want to try and confirm that there is a trace being done to find on which surface the shadow should render
+    * Maybe a mistake in the traces cause the shadow to not appear?
+        * Or appear out of viewport
+
+* Is there a way to confirm that shadows are indeed rendered but out of viewport?
+    * Maybe a way to offset all positions?
+    * Or a way to extend the render targets so they are big enough to recieve the shadows that are far away?
+
+* I am having issues rebuilding yuzu.exe after simple code changes
+    * Change in video_core project
+    * Normal build of yuzu project doesn't refresh the video_core files
+    * Breakpoint won't be active since built code is different from source
+    * Find out what is happening and try to find a way to easily test quick changes
