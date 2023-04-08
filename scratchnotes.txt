@@ -106,6 +106,10 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
 * Is there a way to confirm that shadows are indeed rendered but out of viewport?
     * Maybe a way to offset all positions?
     * Or a way to extend the render targets so they are big enough to recieve the shadows that are far away?
+    * Tried to find the compile code from the NSP file in submission_package.cpp
+        * It does intialize the different parts of the FS found in the ROM
+        * But I see nothing accessing the game logic or code
+        * Maybe try to find another file that uses a submission_package obj to read the code?
 
 * I am having issues rebuilding yuzu.exe after simple code changes
     * Change in video_core project
@@ -114,3 +118,4 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * Find out what is happening and try to find a way to easily test quick changes
     * Fixed rebuilding issues, Resharper added a build type that uses heuristics to know which parts to rebuild
         * I am not sure why, but in this project's case, it prevented files/exes to be built even with changes
+    * Might be worth it to look into more settings for Resharper heuristics builds?
