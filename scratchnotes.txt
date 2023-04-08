@@ -112,3 +112,5 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * Normal build of yuzu project doesn't refresh the video_core files
     * Breakpoint won't be active since built code is different from source
     * Find out what is happening and try to find a way to easily test quick changes
+    * Fixed rebuilding issues, Resharper added a build type that uses heuristics to know which parts to rebuild
+        * I am not sure why, but in this project's case, it prevented files/exes to be built even with changes
