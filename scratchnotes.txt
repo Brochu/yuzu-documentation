@@ -95,6 +95,8 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * What is used to transfer vertex data from vertex shader to fragment shader?
     * Based off of some OpenGL extension for vertex feedback
     * Is that not handled well in Yuzu and that's why some shadow plane vertices are out of viewport
+    * vk_rasterizer, uses vertex streams UpdateVertexInput) based off of regs values
+    * Is there a way to understand how vertex are added to stream and where they are used later in the pipeline
 
 * Can I find how are shadows calculated for sure from the ROM data
     * Find where the code is located in the ROM
