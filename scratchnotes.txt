@@ -119,3 +119,7 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
     * Fixed rebuilding issues, Resharper added a build type that uses heuristics to know which parts to rebuild
         * I am not sure why, but in this project's case, it prevented files/exes to be built even with changes
     * Might be worth it to look into more settings for Resharper heuristics builds?
+        * Available settings will let the Pre- and Post- build events even if project is not rebuilt
+        * Also lets the BeforeBuild and AfterBuild targets run
+        * Does not fix the problem, still better to leave the ReSharper build off for this project
+        * Will let me make changes and test them faster
