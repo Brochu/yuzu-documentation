@@ -125,3 +125,14 @@ I am a bit new with the process of working on OSS on Github, so please let me kn
         * Also lets the BeforeBuild and AfterBuild targets run
         * Does not fix the problem, still better to leave the ReSharper build off for this project
         * Will let me make changes and test them faster
+
+* In order to make sure the depth test is not causing any issues for rendering shadows, try to force disable it
+    * When creating graphics pipeline, one pipeline is represented by a key (GraphicsPipelineKey)
+    * The pipelines are loaded from a pipeline cache file based on the game loaded
+    * the key stores the different states needed to create the graphics pipeline object
+        * fixed_pipeline_state.h/.cpp
+    * In  this file, I found where the depth test state is saved
+        * struct DynamicState in the raw union 2
+        * this union uses a unsigned 32 bit integer to store packed flags and data
+        * the bit at index 27 is the one for depth test
+    * When finding a pipeline that related to shadows, set this bit to 0 (next test)
